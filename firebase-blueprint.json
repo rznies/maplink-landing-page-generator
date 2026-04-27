@@ -1,0 +1,35 @@
+{
+  "entities": {
+    "SiteCache": {
+      "title": "SiteCache",
+      "description": "Cache for generated site data",
+      "type": "object",
+      "properties": {
+        "placeId": { "type": "string" },
+        "siteData": { "type": "string" },
+        "createdAt": { "type": "number" }
+      },
+      "required": ["placeId", "siteData", "createdAt"]
+    },
+    "Lock": {
+      "title": "Lock",
+      "description": "Cache stampede prevention lock",
+      "type": "object",
+      "properties": {
+        "placeId": { "type": "string" },
+        "expiresAt": { "type": "number" }
+      },
+      "required": ["placeId", "expiresAt"]
+    }
+  },
+  "firestore": {
+    "/sites/{placeId}": {
+      "schema": "SiteCache",
+      "description": "Cached generated sites"
+    },
+    "/locks/{placeId}": {
+      "schema": "Lock",
+      "description": "Cache stampede prevention locks"
+    }
+  }
+}
