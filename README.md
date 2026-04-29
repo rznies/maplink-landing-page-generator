@@ -16,6 +16,31 @@ MapLink is an AI-powered tool that analyzes any business website and automatical
   - **Brutalist** - Bold, raw design with industrial aesthetics
 - **Preview Mode** - Toggle between the generated landing page and the analysis view
 - **Local History** - Your generated pages are saved locally for easy access
+- **Export Website** - Download your generated site as standalone HTML
+
+## How to Use
+
+1. Paste a Google Maps business URL
+2. Wait for AI to generate your landing page
+3. Switch between 3 design archetypes
+4. Click **Export** to download the HTML file
+5. Upload to any hosting (Netlify Drop, .host, or your own server)
+
+## Export Your Website
+
+When you click **Export**, you get a standalone `.html` file that:
+
+- Uses Tailwind CDN for styling (needs internet to load)
+- Includes all business info: hero, about, FAQ, contact
+- Links to WhatsApp for direct messaging
+- Customizable footer credit
+
+**Upload options:**
+- **Netlify Drop** - Drag and drop the HTML file
+- **.host** - Upload directly in browser
+- **Your own hosting** - Upload via FTP/SFTP
+
+**Note:** Exported images require an internet connection to load from Google's servers.
 
 ## Run Locally
 
