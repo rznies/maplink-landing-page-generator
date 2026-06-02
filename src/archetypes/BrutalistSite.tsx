@@ -104,23 +104,28 @@ export function BrutalistSite({ data, onBack, currentOverride, onSwitch }: { dat
 
       {/* 4. Value Props */}
       {(data.copy?.value_props?.length ?? 0) > 0 && (
-         <section className="border-b-2 border-[#050505] bg-white">
-            <div className="grid grid-cols-1 md:grid-cols-3 divide-y-2 md:divide-y-0 md:divide-x-2 divide-[#050505]">
-               {data.copy?.value_props?.slice(0,3).map((prop, i) => (
-                  <ScrollReveal key={i} delay={i * 0.1}>
-                    <div className="p-8 md:p-16 hover:bg-[#EAE8E3] transition-colors flex flex-col justify-between min-h-[350px] group">
-                       <div className="text-[#E61919] font-mono font-black text-4xl mb-12 border-b-4 border-[#E61919] w-max pb-2 group-hover:scale-110 origin-left transition-transform">0{i+1}</div>
-                       <div>
-                         <h3 className="text-3xl font-black uppercase mb-6 leading-none" style={{ fontFamily: 'var(--font-sans)' }}>
-                           {prop.split(':')[0]}
-                         </h3>
-                         {prop.includes(':') && (
-                            <p className="text-[#555] font-bold leading-relaxed uppercase tracking-wide">{prop.split(':').slice(1).join(':')}</p>
-                         )}
-                       </div>
-                    </div>
-                  </ScrollReveal>
-               ))}
+         <section className="border-b-2 border-[#050505] bg-white font-mono">
+            <div className="divide-y-2 divide-[#050505]">
+               {data.copy?.value_props?.slice(0,3).map((prop, i) => {
+                  const parts = prop.split(':');
+                  const title = parts[0]?.trim() || prop;
+                  const desc = parts.length > 1 ? parts.slice(1).join(':').trim() : '';
+                  return (
+                    <ScrollReveal key={i} delay={i * 0.05}>
+                      <div className="grid grid-cols-1 md:grid-cols-12 gap-6 p-8 md:p-12 hover:bg-[#F4F4F0] transition-colors items-center">
+                         <div className="md:col-span-2 text-2xl md:text-3xl font-black text-[#E61919] border-b-2 md:border-b-0 border-[#E61919]/20 pb-2 md:pb-0">
+                           0{i+1}.SYS
+                         </div>
+                         <div className="md:col-span-4 text-xl md:text-2xl font-black uppercase tracking-tight text-[#050505]">
+                           {title}
+                         </div>
+                         <div className="md:col-span-6 text-sm md:text-base font-bold text-[#555] uppercase leading-relaxed">
+                           {desc}
+                         </div>
+                      </div>
+                    </ScrollReveal>
+                  );
+               })}
             </div>
          </section>
       )}
@@ -141,6 +146,20 @@ export function BrutalistSite({ data, onBack, currentOverride, onSwitch }: { dat
           </div>
         </section>
       )}
+
+      {/* Testimonials Ticker Marquee */}
+      <section className="bg-[#050505] text-[#F4F4F0] py-6 overflow-hidden border-b-2 border-[#050505] font-mono text-sm font-bold uppercase tracking-widest relative z-10">
+        <div className="flex gap-12 animate-[scroll_30s_linear_infinite] w-max">
+          {[...Array(4)].map((_, idx) => (
+            <div key={idx} className="flex gap-12 items-center">
+              <span>✦ FIELD REPORTS ACTIVE</span>
+              <span>✦ {data.reviewCount} RECORDS SECURED</span>
+              <span>✦ STATUS: VERIFIED</span>
+              <span>✦ RATING: {data.rating} / 5.0</span>
+            </div>
+          ))}
+        </div>
+      </section>
 
       {/* 6. Reviews */}
       {data.originalReviews && data.originalReviews.length > 0 && (

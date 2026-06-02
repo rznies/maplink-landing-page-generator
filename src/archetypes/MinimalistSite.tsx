@@ -45,42 +45,49 @@ export function MinimalistSite({ data, onBack, currentOverride, onSwitch }: { da
       <NoiseOverlay />
 
       {/* 1. Hero */}
-      <section className="pt-40 pb-24 px-4 max-w-5xl mx-auto text-center relative z-10">
-         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1.2, ease: [0.32, 0.72, 0, 1] }}>
-            <span className="inline-block px-4 py-1.5 border border-[#EAEAEA] text-[#787774] text-xs uppercase tracking-[0.1em] rounded-full mb-10 font-medium">
+      <section className="pt-40 pb-24 px-6 max-w-6xl mx-auto relative z-10">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-12 items-center">
+          <motion.div 
+            initial={{ opacity: 0, y: 15 }} 
+            animate={{ opacity: 1, y: 0 }} 
+            transition={{ duration: 1.2, ease: [0.32, 0.72, 0, 1] }}
+            className="md:col-span-7 text-left"
+          >
+            <span className="inline-block px-4 py-1.5 border border-[#EAEAEA] text-[#787774] text-xs uppercase tracking-[0.1em] rounded-full mb-8 font-medium">
               {data.types?.[0]?.replace(/_/g, ' ') || 'Establishment'}
             </span>
-            <h1 className="text-6xl md:text-[6.5rem] font-normal tracking-tight leading-[0.95] mb-10 font-serif">
+            <h1 className="text-5xl md:text-7xl lg:text-8xl font-normal tracking-tight leading-[1.05] mb-8 font-serif pb-2">
               {data.copy?.hero_headline || data.name}
             </h1>
-            <p className="text-2xl text-[#787774] mb-8 leading-relaxed max-w-2xl mx-auto font-serif italic">
+            <p className="text-xl md:text-2xl text-[#787774] mb-8 leading-[1.4] font-serif italic pb-1">
               {data.copy?.subheadline || `Located in ${data.address}`}
             </p>
 
             {/* Pull quote */}
             {data.copy?.pull_quote && (
-              <p className="text-lg text-[#999] font-serif italic mb-10 max-w-xl mx-auto">
+              <p className="text-base text-[#999] font-serif italic border-l-2 border-zinc-200/80 pl-4 mb-8 max-w-md">
                 "{data.copy.pull_quote}"
               </p>
             )}
             
-            <div className="flex justify-center items-center gap-6 mb-16 text-[#787774] text-sm tracking-wide">
-               <div className="flex items-center gap-2"><Star weight="light" className="text-[#111111]" /> {data.rating} Rating</div>
-               <div className="w-1 h-1 rounded-full bg-[#D1D1D1]" />
+            <div className="flex flex-wrap items-center gap-6 text-[#787774] text-xs uppercase tracking-widest font-mono font-semibold">
+               <div className="flex items-center gap-2"><Star weight="light" className="text-[#111111] w-4 h-4" /> {data.rating} / 5.0</div>
+               <div className="w-1.5 h-1.5 rounded-full bg-[#D1D1D1]" />
                <div>{data.reviewCount} Reviews</div>
-               <div className="w-1 h-1 rounded-full bg-[#D1D1D1]" />
-               <div className="flex items-center gap-1"><ShieldCheck weight="light" /> Verified</div>
+               <div className="w-1.5 h-1.5 rounded-full bg-[#D1D1D1]" />
+               <div className="flex items-center gap-1"><ShieldCheck weight="light" className="w-4 h-4" /> Verified</div>
             </div>
-         </motion.div>
-         
-         <motion.div 
-           initial={{ opacity: 0, y: 40, filter: 'blur(10px)' }} 
-           animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }} 
-           transition={{ delay: 0.3, duration: 1.2, ease: [0.32, 0.72, 0, 1] }} 
-           className="w-full aspect-[16/9] md:aspect-[21/9] border border-[#EAEAEA] bg-white p-2"
-         >
-            <img src={heroPhoto} className="w-full h-full object-cover grayscale opacity-90" alt="Hero" />
-         </motion.div>
+          </motion.div>
+          
+          <motion.div 
+            initial={{ opacity: 0, y: 40, filter: 'blur(10px)' }} 
+            animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }} 
+            transition={{ delay: 0.3, duration: 1.2, ease: [0.32, 0.72, 0, 1] }} 
+            className="md:col-span-5 aspect-[3/4] border border-[#EAEAEA] bg-white p-2 shadow-sm"
+          >
+            <img src={heroPhoto} className="w-full h-full object-cover grayscale opacity-90 hover:grayscale-0 transition-all duration-700" alt="Hero" />
+          </motion.div>
+        </div>
       </section>
 
       {/* 2. Specialties */}
@@ -143,14 +150,14 @@ export function MinimalistSite({ data, onBack, currentOverride, onSwitch }: { da
             <ScrollReveal>
               <h2 className="text-4xl md:text-5xl font-normal mb-20 text-center font-serif">Selected Thoughts</h2>
             </ScrollReveal>
-            <div className="columns-1 md:columns-2 gap-8 space-y-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-12">
                {data.originalReviews.map((review, i) => (
-                  <ScrollReveal key={i} delay={i * 0.1} className="break-inside-avoid">
-                    <div className="border border-[#EAEAEA] p-10 hover:border-[#D1D1D1] transition-colors bg-[#FBFBFA]">
-                      <p className="text-[#111111] text-xl leading-relaxed mb-8 font-serif">"{review.text}"</p>
-                      <div className="flex items-center justify-between text-sm text-[#787774] uppercase tracking-widest">
-                        <span className="font-medium">{review.author}</span>
-                        <span className="flex text-[#111111] tracking-[0.2em]">{'★'.repeat(review.rating)}{'☆'.repeat(5-review.rating)}</span>
+                  <ScrollReveal key={i} delay={i * 0.1}>
+                    <div className="py-6 border-b border-[#EAEAEA]/60 last:border-b-0 flex flex-col justify-between h-full">
+                      <p className="text-[#111111] text-lg md:text-xl leading-relaxed mb-8 font-serif italic">"{review.text}"</p>
+                      <div className="flex items-center justify-between text-xs text-[#787774] uppercase tracking-widest font-mono">
+                        <span className="font-semibold">{review.author}</span>
+                        <span className="flex text-[#111111] tracking-[0.1em]">{'★'.repeat(review.rating)}{'☆'.repeat(5-review.rating)}</span>
                       </div>
                     </div>
                   </ScrollReveal>

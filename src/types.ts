@@ -44,5 +44,5 @@ export type GeneratedSiteData = {
   };
 };
 
-export type Archetype = 'structural' | 'minimalist' | 'brutalist';
+export type Archetype = 'structural' | 'minimalist' | 'brutalist' | 'trust' | 'playful';
 

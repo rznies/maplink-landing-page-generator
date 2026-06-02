@@ -9,6 +9,7 @@ export interface CopyContext {
   location: string;
   jtbdPhrases: string[];
   websiteContent?: string;
+  archetype?: string;
 }
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -22,7 +23,22 @@ const MODELS_TO_TRY = [
   'gemini-1.5-pro',
 ] as const;
 
-const SYSTEM_PROMPT = `You are a senior conversion copywriter building a landing page for a local business. Given business info and customer review phrases, output ONLY valid JSON.
+function getSystemPrompt(archetype?: string): string {
+  let toneInstruction = "Write in a clear, friendly, and structured professional tone. Focus on how-to guides, customer ease, step-by-step processes, and direct benefits. Keep it highly legible and modern.";
+  if (archetype === 'minimalist') {
+    toneInstruction = "Write in a slow-paced, poetic, and premium luxury tone. Focus on details, craftsmanship, sanctuary, and high-end materials. Avoid exclamation marks. Use verbs of feeling/observing. Make it feel clean and high-end.";
+  } else if (archetype === 'brutalist') {
+    toneInstruction = "Write in an assertive, high-impact, direct, and utilitarian industrial tone. Focus on speed, strength, machinery, and no-nonsense outcomes. Use uppercase and telegraphic, short sentences. Avoid fluff.";
+  } else if (archetype === 'trust') {
+    toneInstruction = "Write in a formal, authoritative, traditional, secure, and reassuring tone. Focus on credentials, licensing, safety, clinical/professional precision, and peace of mind. Use clear, structured benefit statements.";
+  } else if (archetype === 'playful') {
+    toneInstruction = "Write in a bouncy, friendly, warm, high-character, and accessible tone. Focus on fun, community, comfort, sweetness, and high energy. Keep it conversational and bright.";
+  }
+
+  return `You are a senior conversion copywriter building a landing page for a local business. Given business info and customer review phrases, output ONLY valid JSON.
+
+TONE OF VOICE REQUIREMENT:
+${toneInstruction}
 
 RULES — never break these:
 1. hero_headline: Short, punchy, intuitive. MAX 8 WORDS. Must feel like a tagline a real brand would use. Name a specific offering or outcome. NEVER use comparatives ("best", "better than"). NEVER use generic adjectives ("premium", "amazing", "top-notch", "great"). 
@@ -43,6 +59,7 @@ RULES — never break these:
 9. testimonials: 2 short customer phrases (under 20 words each).
 
 Output JSON schema: { hero_headline, subheadline, value_props, services, how_it_works, faqs, specialties, pull_quote, testimonials }`;
+}
 
 // ─── Export ───────────────────────────────────────────────────────────────────
 
@@ -77,7 +94,7 @@ export async function generateCopy(ctx: CopyContext): Promise<SiteCopy> {
           model: modelName,
           contents: userContent,
           config: {
-            systemInstruction: SYSTEM_PROMPT,
+            systemInstruction: getSystemPrompt(ctx.archetype),
             temperature: 0.2,
             responseMimeType: 'application/json',
           },

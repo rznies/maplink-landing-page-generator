@@ -216,7 +216,7 @@ export function StructuralSite({ data, onBack, currentOverride, onSwitch }: { da
         </section>
       )}
 
-      {/* 3. Why us — Value Props (redesigned) */}
+      {/* 3. Why us — Value Props (Bento Grid) */}
       {(data.copy?.value_props?.length ?? 0) > 0 && (
          <section className="py-32 px-4 bg-white">
             <div className="max-w-[1400px] mx-auto">
@@ -229,14 +229,31 @@ export function StructuralSite({ data, onBack, currentOverride, onSwitch }: { da
                     const parts = prop.split(':');
                     const title = parts[0]?.trim() || prop;
                     const desc = parts.length > 1 ? parts.slice(1).join(':').trim() : '';
+                    
+                    const isFeature = i === 0;
+                    const cardClass = isFeature
+                      ? "h-full p-10 bg-zinc-900 text-white rounded-3xl group md:col-span-2 flex flex-col justify-between min-h-[320px] transition-transform duration-500 hover:scale-[1.01]"
+                      : "h-full p-10 bg-[#FDFBF7] border border-zinc-200 rounded-3xl group md:col-span-1 flex flex-col justify-between min-h-[320px] hover:border-zinc-300 transition-colors";
+                    const titleClass = isFeature
+                      ? "text-3xl md:text-4xl font-bold tracking-tight mb-4 leading-tight text-white"
+                      : "text-2xl font-bold tracking-tight mb-3 text-zinc-900 leading-tight";
+                    const descClass = isFeature
+                      ? "text-zinc-300 leading-relaxed text-lg max-w-xl"
+                      : "text-zinc-500 leading-relaxed text-base";
+                    const iconClass = isFeature
+                      ? "text-4xl mb-12 text-zinc-400 group-hover:text-white transition-colors duration-500"
+                      : "text-3xl mb-8 text-zinc-200 group-hover:text-zinc-900 transition-colors duration-500";
+
                     return (
-                      <ScrollReveal key={i} delay={i * 0.1}>
-                        <div className="h-full p-10 bg-[#FDFBF7] border border-zinc-200 rounded-2xl group hover:border-zinc-300 transition-colors">
-                          <div className="text-3xl mb-8 text-zinc-200 group-hover:text-zinc-900 transition-colors duration-500" style={{ fontFamily: 'var(--font-sans)' }}>
-                            {VALUE_ICONS[i] || '✦'}
+                      <ScrollReveal key={i} delay={i * 0.1} className={isFeature ? "md:col-span-2" : "md:col-span-1"}>
+                        <div className={cardClass}>
+                          <div>
+                            <div className={iconClass} style={{ fontFamily: 'var(--font-sans)' }}>
+                              {VALUE_ICONS[i] || '✦'}
+                            </div>
+                            <h3 className={titleClass}>{title}</h3>
                           </div>
-                          <h3 className="text-2xl font-bold tracking-tight mb-3 text-zinc-900 leading-tight">{title}</h3>
-                          {desc && <p className="text-zinc-500 leading-relaxed text-base">{desc}</p>}
+                          {desc && <p className={descClass}>{desc}</p>}
                         </div>
                       </ScrollReveal>
                     );
@@ -246,32 +263,26 @@ export function StructuralSite({ data, onBack, currentOverride, onSwitch }: { da
          </section>
       )}
 
-      {/* 4. How It Works — timeline with arrows */}
+      {/* 4. How It Works — Clean vertical progress split */}
       {(data.copy?.how_it_works?.length ?? 0) > 0 && (
         <section className="py-32 px-4 bg-[#FDFBF7]">
-          <div className="max-w-[1400px] mx-auto">
+          <div className="max-w-[1000px] mx-auto">
             <ScrollReveal>
-              <h2 className="text-4xl md:text-5xl font-bold tracking-tighter mb-16 text-zinc-900" style={{ fontFamily: 'var(--font-sans)' }}>How it works</h2>
+              <h2 className="text-4xl md:text-5xl font-bold tracking-tighter mb-20 text-zinc-900 text-center" style={{ fontFamily: 'var(--font-sans)' }}>How it works</h2>
             </ScrollReveal>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-0">
+            <div className="relative border-l-2 border-zinc-200 ml-4 md:ml-32 space-y-16 py-2">
               {data.copy.how_it_works!.map((step, i) => (
                 <ScrollReveal key={i} delay={i * 0.1}>
-                  <div className="relative flex flex-col items-start p-8 md:p-10">
-                    {/* Step number badge */}
-                    <div className="w-12 h-12 rounded-full bg-zinc-900 text-white flex items-center justify-center font-bold text-lg mb-6">
+                  <div className="relative pl-8 md:pl-12">
+                    {/* Step number badge pinned on the timeline line */}
+                    <div className="absolute -left-[33px] top-0 w-12 h-12 rounded-full bg-zinc-900 text-white flex items-center justify-center font-bold text-lg shadow-md">
                       {i + 1}
                     </div>
-                    <p className="text-xl font-semibold text-zinc-800 leading-snug">{step.replace(/^\d+\.\s*/, '')}</p>
-                    {/* Arrow connector */}
-                    {i < (data.copy.how_it_works!.length - 1) && (
-                      <div className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 z-10 w-10 h-10 rounded-full bg-white border border-zinc-200 items-center justify-center">
-                        <ArrowRight weight="bold" className="w-4 h-4 text-zinc-400" />
-                      </div>
-                    )}
-                    {/* Vertical divider on desktop */}
-                    {i < (data.copy.how_it_works!.length - 1) && (
-                      <div className="hidden md:block absolute right-0 top-6 bottom-6 w-px bg-zinc-200" />
-                    )}
+                    {/* Step Content */}
+                    <div className="pt-2">
+                      <p className="text-xl md:text-2xl font-bold text-zinc-900 leading-tight">{step.replace(/^\d+\.\s*/, '')}</p>
+                      <p className="text-zinc-500 mt-2 leading-relaxed text-sm md:text-base">We coordinate all the details to ensure a seamless experience from start to finish.</p>
+                    </div>
                   </div>
                 </ScrollReveal>
               ))}

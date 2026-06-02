@@ -1,8 +1,11 @@
 import type { ComponentType } from 'react';
-import type { GeneratedSiteData, Archetype } from '../types';
+import type { GeneratedSiteData } from '../types';
 import { BrutalistSite } from '../archetypes/BrutalistSite';
 import { MinimalistSite } from '../archetypes/MinimalistSite';
 import { StructuralSite } from '../archetypes/StructuralSite';
+import { TrustSite } from '../archetypes/TrustSite';
+import { PlayfulSite } from '../archetypes/PlayfulSite';
+import { Archetype, resolveArchetype } from './archetypeRules';
 
 export interface ArchetypeConfig {
   id: Archetype;
@@ -23,8 +26,7 @@ export const ARCHETYPES_REGISTRY: ArchetypeConfig[] = [
     component: BrutalistSite,
     triggerTypes: [
       'gym', 'gymnasium', 'mechanic', 'car_repair', 'hardware_store',
-      'construction_company', 'night_club', 'bar', 'electrician',
-      'plumber', 'roofing_contractor', 'hvac_contractor', 'stadium'
+      'construction_company', 'night_club', 'bar', 'stadium'
     ]
   },
   {
@@ -32,8 +34,26 @@ export const ARCHETYPES_REGISTRY: ArchetypeConfig[] = [
     label: 'Editorial Luxury',
     component: MinimalistSite,
     triggerTypes: [
-      'restaurant', 'cafe', 'bakery', 'spa', 'beauty_salon',
-      'real_estate_agency', 'art_gallery', 'clothing_store', 'food', 'store'
+      'restaurant', 'cafe', 'spa', 'beauty_salon',
+      'real_estate_agency', 'art_gallery', 'clothing_store'
+    ]
+  },
+  {
+    id: 'trust',
+    label: 'Trust-First Heritage',
+    component: TrustSite,
+    triggerTypes: [
+      'dentist', 'doctor', 'physiotherapist', 'lawyer', 'accounting',
+      'school', 'university', 'bank', 'medical_clinic'
+    ]
+  },
+  {
+    id: 'playful',
+    label: 'Vibrant & Playful',
+    component: PlayfulSite,
+    triggerTypes: [
+      'amusement_park', 'bowling_alley', 'toy_store', 'pet_store',
+      'florist', 'ice_cream_shop', 'party_planner'
     ]
   },
   {
@@ -44,11 +64,4 @@ export const ARCHETYPES_REGISTRY: ArchetypeConfig[] = [
   }
 ];
 
-export function resolveArchetype(types: string[]): Archetype {
-  for (const config of ARCHETYPES_REGISTRY) {
-    if (config.triggerTypes.length > 0 && types.some(t => config.triggerTypes.includes(t))) {
-      return config.id;
-    }
-  }
-  return 'structural';
-}
+export { resolveArchetype };

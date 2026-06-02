@@ -3,6 +3,7 @@ import type { PlaceDetails, SiteCopy } from './types';
 import FirecrawlApp from '@mendable/firecrawl-js';
 import { extractJtbdPhrases } from './jtbdExtractor';
 import { generateCopy } from './copyGenerator';
+import { resolveArchetype } from '../src/lib/archetypeRules';
 
 export class DefaultCopywriter implements Copywriter {
   async writeCopy(
@@ -85,12 +86,14 @@ export class DefaultCopywriter implements Copywriter {
 
     // 3. Generate AI marketing copy
     onProgress('Writing your headline...');
+    const archetype = resolveArchetype(details.types || []);
     const copy = await generateCopy({
       name: details.name,
       category: details.types?.[0]?.replace(/_/g, ' ') ?? '',
       location: details.address,
       jtbdPhrases,
       websiteContent,
+      archetype,
     });
 
     return copy;
