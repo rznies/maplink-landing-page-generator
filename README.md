@@ -33,14 +33,14 @@ When you click **Export**, you get a standalone `.html` file that:
 - Uses Tailwind CDN for styling (needs internet to load)
 - Includes all business info: hero, about, FAQ, contact
 - Links to WhatsApp for direct messaging
-- Customizable footer credit
+- Uses safe fallback images when Google Places photos cannot be exported securely
 
 **Upload options:**
 - **Netlify Drop** - Drag and drop the HTML file
 - **.host** - Upload directly in browser
 - **Your own hosting** - Upload via FTP/SFTP
 
-**Note:** Exported images require an internet connection to load from Google's servers.
+**Note:** Exported files are static HTML. Google Places photo URLs are not embedded because they include private API credentials.
 
 ## Run Locally
 

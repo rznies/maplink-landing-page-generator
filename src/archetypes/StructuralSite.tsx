@@ -15,182 +15,10 @@ import {
 import { PremiumCard } from '../components/ui/PremiumCard';
 import { ScrollReveal } from '../components/ui/ScrollReveal';
 import { FloatingNav } from '../components/ui/FloatingNav';
-
-type Review = { author: string; authorPhoto: string; rating: number; text: string; time: string; };
-type GeneratedSiteData = {
-  placeId: string; name: string; types: string[]; address: string; rating: number; reviewCount: number;
-  hours: string[]; website: string; phone?: string; photos: string[]; originalReviews: Review[];
-  copy: { hero_headline: string; subheadline: string; value_props: string[]; services?: string[]; how_it_works?: string[]; faqs: { q: string; a: string }[]; testimonials: string[]; specialties?: string[]; pull_quote?: string; };
-};
-
-function getWaLink(phone: string | undefined, text: string) {
-  if (!phone) return '#contact';
-  return `https://wa.me/${phone.replace(/\D/g,'')}?text=${encodeURIComponent(text)}`;
-}
-
-const FALLBACK_FAQS = [
-  { q: "What are your working hours?", a: "Please check our hours listed on this page. We recommend calling ahead to confirm availability for your visit." },
-  { q: "Do you offer free consultations?", a: "Yes, we offer an initial consultation to understand your needs. Get in touch via WhatsApp or phone to schedule." },
-  { q: "What is your typical turnaround time?", a: "Timelines vary by project scope. We'll provide a clear estimate after understanding your requirements." },
-  { q: "Do you serve my area?", a: "We primarily serve the local area and surroundings. Contact us with your location and we'll confirm coverage." },
-];
-
-function generateStructuralHtml(data: GeneratedSiteData): string {
-  const heroPhoto = data.photos[0] || 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80';
-  const galleryPhotos = data.photos.slice(1, 7);
-  const faqsToRender = (data.copy?.faqs?.length > 0 && data.copy.faqs[0]?.q) ? data.copy.faqs : FALLBACK_FAQS;
-  const waLink = data.phone ? `https://wa.me/${data.phone.replace(/\D/g,'')}?text=${encodeURIComponent('Hi ' + data.name + ', I found you on Google.')}` : '#contact';
-  const mapLink = `https://maps.google.com/?q=${encodeURIComponent(data.address)}`;
-
-  return `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${data.name}</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-    body { font-family: 'Inter', sans-serif; }
-    @keyframes scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
-    .reviews-scroll:hover { animation-play-state: paused; }
-  </style>
-</head>
-<body class="bg-[#FDFBF7] text-zinc-900">
-  <!-- Hero -->
-  <section class="min-h-screen pt-24 pb-24 px-4 md:px-8 flex flex-col justify-center max-w-[1400px] mx-auto">
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
-      <div class="lg:col-span-6">
-        <h1 class="text-5xl md:text-7xl font-bold tracking-tighter leading-[0.95] text-zinc-900 mb-6">
-          ${data.copy?.hero_headline || data.name}
-        </h1>
-        <p class="text-xl md:text-2xl text-zinc-500 mb-8 leading-relaxed max-w-xl">
-          ${data.copy?.subheadline || 'Premium service located in ' + data.address}
-        </p>
-        <div class="flex flex-wrap items-center gap-4 mb-10">
-          <div class="bg-zinc-100 px-5 py-2.5 rounded-full flex items-center gap-2">
-            <span class="text-amber-500">★</span>
-            <span class="font-bold text-sm">${data.rating} / 5.0</span>
-            <span class="text-zinc-500 text-sm">(${data.reviewCount} Reviews)</span>
-          </div>
-          <div class="bg-zinc-100 px-5 py-2.5 rounded-full flex items-center gap-2">
-            <span class="text-blue-600">✓</span>
-            <span class="font-semibold text-sm">Verified</span>
-          </div>
-        </div>
-        <a href="#contact" class="inline-block bg-zinc-950 text-white px-8 py-4 rounded-full font-bold text-sm">Get in Touch →</a>
-      </div>
-      <div class="lg:col-span-6">
-        <img src="${heroPhoto}" alt="${data.name}" class="w-full aspect-[4/3] lg:aspect-square object-cover rounded-2xl shadow-xl">
-      </div>
-    </div>
-  </section>
-
-  <!-- Specialties -->
-  ${(data.copy?.specialties?.length ?? 0) > 0 ? `
-  <section class="py-10 bg-zinc-950">
-    <div class="max-w-[1400px] mx-auto px-4">
-      <div class="flex flex-wrap items-center gap-8">
-        <span class="text-zinc-500 text-xs font-bold uppercase tracking-[0.2em]">What we're known for</span>
-        <div class="flex flex-wrap gap-3">
-          ${data.copy.specialties!.map(s => `<span class="px-6 py-3 rounded-full border border-zinc-700 text-white text-sm">${s}</span>`).join('')}
-        </div>
-      </div>
-    </div>
-  </section>
-  ` : ''}
-
-  <!-- Value Props -->
-  ${(data.copy?.value_props?.length ?? 0) > 0 ? `
-  <section class="py-32 px-4 bg-white">
-    <div class="max-w-[1400px] mx-auto">
-      <h2 class="text-4xl md:text-5xl font-bold tracking-tighter mb-4">Why people choose us</h2>
-      <p class="text-zinc-400 text-lg mb-16 max-w-lg">Real reasons from real customers.</p>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        ${data.copy?.value_props?.slice(0,3).map((prop, i) => {
-          const parts = prop.split(':');
-          const title = parts[0]?.trim() || prop;
-          const desc = parts.length > 1 ? parts.slice(1).join(':').trim() : '';
-          return `
-          <div class="p-10 bg-[#FDFBF7] border border-zinc-200 rounded-2xl">
-            <div class="text-3xl mb-8 text-zinc-200">${['✦', '◆', '●'][i] || '✦'}</div>
-            <h3 class="text-2xl font-bold mb-3">${title}</h3>
-            ${desc ? `<p class="text-zinc-500">${desc}</p>` : ''}
-          </div>
-          `;
-        }).join('')}
-      </div>
-    </div>
-  </section>
-  ` : ''}
-
-  <!-- Gallery -->
-  ${galleryPhotos.length > 0 ? `
-  <section class="py-24 px-4 bg-zinc-50">
-    <div class="max-w-[1400px] mx-auto">
-      <h2 class="text-4xl md:text-5xl font-bold tracking-tighter mb-12">Gallery</h2>
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        ${galleryPhotos.slice(0, 4).map(photo => `
-          <img src="${photo}" class="w-full aspect-square object-cover rounded-xl">
-        `).join('')}
-      </div>
-    </div>
-  </section>
-  ` : ''}
-
-  <!-- FAQs -->
-  <section class="py-24 px-4 bg-white">
-    <div class="max-w-3xl mx-auto">
-      <h2 class="text-4xl md:text-5xl font-bold tracking-tighter mb-12">Frequently asked questions</h2>
-      <div class="space-y-0">
-        ${faqsToRender.map(faq => `
-          <div class="border-b border-zinc-200 py-6">
-            <div class="font-semibold text-lg">${faq.q}</div>
-            <p class="text-zinc-500 mt-2">${faq.a}</p>
-          </div>
-        `).join('')}
-      </div>
-    </div>
-  </section>
-
-  <!-- Contact -->
-  <section id="contact" class="py-24 px-4 bg-zinc-950 text-white">
-    <div class="max-w-[1400px] mx-auto">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
-        <div>
-          <h2 class="text-4xl md:text-5xl font-bold tracking-tighter mb-6">Get in touch</h2>
-          <p class="text-zinc-400 text-lg mb-8">We'd love to hear from you.</p>
-          ${data.phone ? `
-          <a href="${waLink}" class="inline-flex items-center gap-3 bg-[#25D366] text-white px-6 py-3 rounded-full font-bold mb-4">
-            <span>WhatsApp</span> <span>→</span>
-          </a>
-          <br>
-          ` : ''}
-          <a href="${mapLink}" target="_blank" class="inline-flex items-center gap-2 text-zinc-400 hover:text-white">
-            <span>📍</span> <span>${data.address}</span>
-          </a>
-        </div>
-        <div>
-          ${data.hours?.length > 0 ? `
-          <div class="bg-zinc-900 rounded-2xl p-8">
-            <h3 class="font-bold text-lg mb-4">Hours</h3>
-            <div class="space-y-2 text-zinc-400">
-              ${data.hours.map(h => `<div>${h}</div>`).join('')}
-            </div>
-          </div>
-          ` : ''}
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Footer -->
-  <footer class="py-8 px-4 bg-zinc-950 text-zinc-500 text-sm text-center">
-    <p>Built with <a href="https://maplink.dev" class="underline">MapLink</a></p>
-  </footer>
-</body>
-</html>`;
-}
+import { downloadHtml, slugifyFilename } from '../lib/exportHtml';
+import type { Review, GeneratedSiteData } from '../types';
+import { getWaLink, resolveFaqs } from '../lib/archetypeUtils';
+import { buildHtml, structuralThemeAdapter } from '../lib/htmlBuilder';
 
 function FaqItem({ q, a }: { q: string; a: string }) {
   const [open, setOpen] = useState(false);
@@ -300,7 +128,7 @@ const VALUE_ICONS = ['✦', '◆', '●'];
 export function StructuralSite({ data, onBack, currentOverride, onSwitch }: { data: GeneratedSiteData, onBack: () => void, currentOverride: string, onSwitch: (v: string) => void }) {
   const heroPhoto = data.photos[0] || 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80';
   const galleryPhotos = data.photos.slice(1, 7);
-  const faqsToRender = (data.copy?.faqs?.length > 0 && data.copy.faqs[0]?.q) ? data.copy.faqs : FALLBACK_FAQS;
+  const faqsToRender = resolveFaqs(data.copy);
 
   const navSections = [
     { id: 'about', label: 'About' },
@@ -311,14 +139,8 @@ export function StructuralSite({ data, onBack, currentOverride, onSwitch }: { da
   ];
 
   const handleExport = () => {
-    const html = generateStructuralHtml(data);
-    const blob = new Blob([html], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${data.name.toLowerCase().replace(/\s+/g, '-')}-structural.html`;
-    a.click();
-    URL.revokeObjectURL(url);
+    const html = buildHtml(data, structuralThemeAdapter);
+    downloadHtml(html, `${slugifyFilename(data.name)}-structural.html`);
   };
 
   return (

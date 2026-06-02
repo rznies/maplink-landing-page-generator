@@ -4,18 +4,10 @@ import { Star, ShieldCheck, ArrowUpRight, Plus, Minus } from '@phosphor-icons/re
 import { NoiseOverlay } from '../components/ui/NoiseOverlay';
 import { ScrollReveal } from '../components/ui/ScrollReveal';
 import { FloatingNav } from '../components/ui/FloatingNav';
-
-type Review = { author: string; authorPhoto: string; rating: number; text: string; time: string; };
-type GeneratedSiteData = {
-  placeId: string; name: string; types: string[]; address: string; rating: number; reviewCount: number;
-  hours: string[]; website: string; phone?: string; photos: string[]; originalReviews: Review[];
-  copy: { hero_headline: string; subheadline: string; value_props: string[]; services?: string[]; how_it_works?: string[]; faqs: { q: string; a: string }[]; testimonials: string[]; specialties?: string[]; pull_quote?: string; };
-};
-
-function getWaLink(phone: string | undefined, text: string) {
-  if (!phone) return '#contact';
-  return `https://wa.me/${phone.replace(/\D/g,'')}?text=${encodeURIComponent(text)}`;
-}
+import { downloadHtml, slugifyFilename } from '../lib/exportHtml';
+import type { Review, GeneratedSiteData } from '../types';
+import { getWaLink, resolveFaqs } from '../lib/archetypeUtils';
+import { buildHtml, minimalistThemeAdapter } from '../lib/htmlBuilder';
 
 function FaqItem({ q, a }: { q: string; a: string }) {
   const [open, setOpen] = useState(false);
@@ -37,112 +29,14 @@ function FaqItem({ q, a }: { q: string; a: string }) {
   );
 }
 
-function generateMinimalistHtml(data: GeneratedSiteData): string {
-  const heroPhoto = data.photos[0] || 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80';
-  const waLink = data.phone ? `https://wa.me/${data.phone.replace(/\D/g,'')}?text=${encodeURIComponent('Hi ' + data.name + ', I found you on Google.')}` : '#contact';
-  const mapLink = `https://maps.google.com/?q=${encodeURIComponent(data.address)}`;
-
-  return `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${data.name}</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Inter:wght@400;500&display=swap');
-    body { font-family: 'Inter', sans-serif; }
-    .serif { font-family: 'Playfair Display', serif; }
-  </style>
-</head>
-<body class="bg-[#FBFBFA] text-[#111111]">
-  <!-- Hero -->
-  <section class="pt-40 pb-24 px-4 max-w-5xl mx-auto text-center">
-    <span class="inline-block px-4 py-1.5 border border-[#EAEAEA] text-[#787774] text-xs uppercase tracking-[0.1em] rounded-full mb-10">
-      ${data.types?.[0]?.replace(/_/g, ' ') || 'Establishment'}
-    </span>
-    <h1 class="text-6xl md:text-[6.5rem] font-normal tracking-tight leading-[0.95] mb-10 serif">
-      ${data.copy?.hero_headline || data.name}
-    </h1>
-    <p class="text-2xl text-[#787774] mb-8 leading-relaxed max-w-2xl mx-auto serif italic">
-      ${data.copy?.subheadline || 'Located in ' + data.address}
-    </p>
-    ${data.copy?.pull_quote ? `
-    <p class="text-lg text-[#999] serif italic mb-10 max-w-xl mx-auto">"${data.copy.pull_quote}"</p>
-    ` : ''}
-    <div class="flex justify-center items-center gap-6 mb-16 text-[#787774] text-sm tracking-wide">
-      <div>★ ${data.rating} Rating</div>
-      <div class="w-1 h-1 rounded-full bg-[#D1D1D1]"></div>
-      <div>${data.reviewCount} Reviews</div>
-      <div class="w-1 h-1 rounded-full bg-[#D1D1D1]"></div>
-      <div>✓ Verified</div>
-    </div>
-    <img src="${heroPhoto}" class="w-full aspect-[16/9] md:aspect-[21/9] object-cover grayscale opacity-90" alt="Hero">
-  </section>
-
-  ${(data.copy?.specialties?.length ?? 0) > 0 ? `
-  <section class="py-12 px-4 border-t border-[#EAEAEA]">
-    <div class="max-w-5xl mx-auto text-center">
-      <span class="text-[#787774] text-xs uppercase tracking-[0.15em] mr-4">Known for</span>
-      ${data.copy.specialties!.map(s => `
-      <span class="inline-block px-4 py-2 bg-[#F5F5F5] text-[#111] text-sm mr-2 mb-2">${s}</span>
-      `).join('')}
-    </div>
-  </section>
-  ` : ''}
-
-  ${(data.copy?.value_props?.length ?? 0) > 0 ? `
-  <section class="py-24 px-4">
-    <div class="max-w-4xl mx-auto">
-      ${data.copy.value_props!.slice(0, 3).map((prop, i) => `
-      <div class="py-12 border-b border-[#EAEAEA]">
-        <h3 class="text-2xl font-normal serif mb-4">${prop}</h3>
-      </div>
-      `).join('')}
-    </div>
-  </section>
-  ` : ''}
-
-  <section class="py-24 px-4 max-w-3xl mx-auto">
-    <h2 class="text-3xl font-normal serif mb-12 text-center">Questions</h2>
-    ${data.copy?.faqs?.map(faq => `
-    <div class="border-b border-[#EAEAEA] py-7">
-      <div class="font-normal text-xl serif">${faq.q}</div>
-      <p class="text-[#787774] mt-2 serif">${faq.a}</p>
-    </div>
-    `).join('')}
-  </section>
-
-  <section id="contact" class="py-24 px-4 bg-[#111] text-white text-center">
-    <h2 class="text-4xl font-normal serif mb-8">Get in touch</h2>
-    ${data.phone ? `
-    <a href="${waLink}" class="inline-block px-8 py-4 border border-white rounded-full mb-8">WhatsApp</a>
-    <br>
-    ` : ''}
-    <a href="${mapLink}" target="_blank" class="text-zinc-400">${data.address}</a>
-  </section>
-
-  <footer class="py-8 px-4 text-center text-[#999] text-sm">
-    <p>Built with <a href="https://maplink.dev" class="underline">MapLink</a></p>
-  </footer>
-</body>
-</html>`;
-}
-
 export function MinimalistSite({ data, onBack, currentOverride, onSwitch }: { data: GeneratedSiteData, onBack: () => void, currentOverride: string, onSwitch: (v: string) => void }) {
   const heroPhoto = data.photos[0] || '';
   const galleryPhotos = data.photos.slice(1, 7);
   const ctaLink = getWaLink(data.phone, `Hi ${data.name}, I found you on Google.`);
 
   const handleExport = () => {
-    const html = generateMinimalistHtml(data);
-    const blob = new Blob([html], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${data.name.toLowerCase().replace(/\s+/g, '-')}-minimalist.html`;
-    a.click();
-    URL.revokeObjectURL(url);
+    const html = buildHtml(data, minimalistThemeAdapter);
+    downloadHtml(html, `${slugifyFilename(data.name)}-minimalist.html`);
   };
   
   return (

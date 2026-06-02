@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ArrowLeft, CaretDown, Check, Export } from '@phosphor-icons/react';
+import { ARCHETYPES_REGISTRY } from '../../lib/archetypeRegistry';
 
 interface FloatingNavProps {
   onBack: () => void;
@@ -12,11 +13,8 @@ interface FloatingNavProps {
 
 export function FloatingNav({ onBack, currentOverride, onSwitch, businessName, onExport }: FloatingNavProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const options = [
-    { id: 'structural', label: 'Soft Structuralism' },
-    { id: 'minimalist', label: 'Editorial Luxury' },
-    { id: 'brutalist', label: 'Swiss Industrial' }
-  ];
+  const options = ARCHETYPES_REGISTRY.map(a => ({ id: a.id, label: a.label }));
+
 
   return (
     <div className="fixed top-0 left-0 right-0 z-[100] pointer-events-none">

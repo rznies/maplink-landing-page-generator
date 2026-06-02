@@ -3,126 +3,10 @@ import { motion } from 'motion/react';
 import { Star, ArrowUpRight } from '@phosphor-icons/react';
 import { ScrollReveal } from '../components/ui/ScrollReveal';
 import { FloatingNav } from '../components/ui/FloatingNav';
-
-type Review = { author: string; authorPhoto: string; rating: number; text: string; time: string; };
-type GeneratedSiteData = {
-  placeId: string; name: string; types: string[]; address: string; rating: number; reviewCount: number;
-  hours: string[]; website: string; phone?: string; photos: string[]; originalReviews: Review[];
-  copy: { hero_headline: string; subheadline: string; value_props: string[]; services?: string[]; how_it_works?: string[]; faqs: { q: string; a: string }[]; testimonials: string[]; specialties?: string[]; pull_quote?: string; };
-};
-
-function getWaLink(phone: string | undefined, text: string) {
-  if (!phone) return '#contact';
-  return `https://wa.me/${phone.replace(/\D/g,'')}?text=${encodeURIComponent(text)}`;
-}
-
-function generateBrutalistHtml(data: GeneratedSiteData): string {
-  const heroPhoto = data.photos[0] || 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80';
-  const waLink = data.phone ? `https://wa.me/${data.phone.replace(/\D/g,'')}?text=${encodeURIComponent('Hi ' + data.name + ', I found you on Google.')}` : '#contact';
-  const mapLink = `https://maps.google.com/?q=${encodeURIComponent(data.address)}`;
-
-  return `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${data.name}</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800;900&display=swap');
-    body { font-family: 'Space Grotesk', sans-serif; }
-  </style>
-</head>
-<body class="bg-[#F4F4F0] text-[#050505] pb-24">
-  <!-- Hero -->
-  <header class="pt-24 px-4 md:px-8 border-b-2 border-[#050505] pb-12">
-    <div class="flex flex-col justify-between items-end gap-12 uppercase">
-      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end w-full gap-4">
-        <div class="text-[#E61919] font-black tracking-widest text-sm flex items-center gap-3">
-          <span class="w-4 h-4 bg-[#E61919] inline-block"></span>
-          ${data.types?.[0]?.replace(/_/g, ' ') || 'FACILITY'}
-        </div>
-        <div class="text-left sm:text-right text-xs text-[#555] font-mono font-bold tracking-widest">
-          <div>ID NO. ${data.placeId.slice(0, 8).toUpperCase()}</div>
-          <div>SYS.ACTIVE</div>
-        </div>
-      </div>
-      <h1 class="text-6xl md:text-[9rem] lg:text-[11rem] font-black leading-[0.8] tracking-tighter uppercase break-words w-full">
-        ${data.name}
-      </h1>
-    </div>
-  </header>
-
-  <!-- Headline + Photo -->
-  <section class="grid grid-cols-1 lg:grid-cols-12 border-b-2 border-[#050505]">
-    <div class="lg:col-span-5 p-8 md:p-16 border-b-2 lg:border-b-0 lg:border-r-2 border-[#050505]">
-      <h2 class="text-5xl md:text-6xl font-black uppercase leading-[0.9] mb-8">
-        ${data.copy?.hero_headline || "BUILT FOR RESULTS"}
-      </h2>
-      <p class="text-xl text-[#333] font-bold leading-relaxed max-w-sm uppercase">
-        ${data.copy?.subheadline || 'Premium facility located in ' + data.address}
-      </p>
-      <div class="flex items-center gap-4 mt-8">
-        <a href="#contact" class="bg-[#050505] text-white px-6 py-3 font-black uppercase tracking-wider text-sm">GET IN TOUCH</a>
-        <span class="text-xs font-mono">★ ${data.rating}.0 (${data.reviewCount})</span>
-      </div>
-    </div>
-    <div class="lg:col-span-7">
-      <img src="${heroPhoto}" class="w-full h-full object-cover" alt="${data.name}">
-    </div>
-  </section>
-
-  <!-- Specialties -->
-  ${(data.copy?.specialties?.length ?? 0) > 0 ? `
-  <section class="border-b-2 border-[#050505]">
-    <div class="px-4 py-3 bg-[#050505] text-white font-mono text-xs font-bold tracking-widest">SPECIALTIES</div>
-    <div class="p-8 flex flex-wrap gap-3">
-      ${data.copy.specialties!.map(s => `
-      <span class="border-2 border-[#050505] px-4 py-2 font-black uppercase text-sm">${s}</span>
-      `).join('')}
-    </div>
-  </section>
-  ` : ''}
-
-  <!-- Value Props -->
-  ${(data.copy?.value_props?.length ?? 0) > 0 ? `
-  <section class="grid grid-cols-1 md:grid-cols-3 border-b-2 border-[#050505]">
-    ${data.copy.value_props!.slice(0,3).map((prop, i) => `
-    <div class="p-8 border-b-2 md:border-b-0 md:border-r-2 border-[#050505] ${i === 2 ? 'border-r-0' : ''}">
-      <div class="text-4xl font-black text-[#E61919] mb-4">0${i + 1}</div>
-      <div class="font-bold uppercase text-sm">${prop}</div>
-    </div>
-    `).join('')}
-  </section>
-  ` : ''}
-
-  <!-- FAQs -->
-  <section class="py-16 px-4 max-w-3xl mx-auto">
-    <div class="font-mono text-xs font-bold tracking-widest mb-8">Q&A</div>
-    ${data.copy?.faqs?.map(faq => `
-    <div class="border-b-2 border-[#050505] py-6">
-      <div class="font-bold uppercase text-sm mb-2">${faq.q}</div>
-      <p class="text-zinc-600 text-sm">${faq.a}</p>
-    </div>
-    `).join('')}
-  </section>
-
-  <!-- Contact -->
-  <section id="contact" class="border-t-2 border-[#050505] p-8 md:p-16">
-    <h2 class="text-6xl font-black uppercase mb-8">GET IN TOUCH</h2>
-    ${data.phone ? `
-    <a href="${waLink}" class="inline-block bg-[#25D366] text-white px-8 py-4 font-bold uppercase">WHATSAPP →</a>
-    <br><br>
-    ` : ''}
-    <a href="${mapLink}" target="_blank" class="font-mono text-sm">${data.address}</a>
-  </section>
-
-  <footer class="py-8 px-4 text-center font-mono text-xs">
-    <p>BUILT WITH <a href="https://maplink.dev" class="underline">MAPLINK</a></p>
-  </footer>
-</body>
-</html>`;
-}
+import { downloadHtml, slugifyFilename } from '../lib/exportHtml';
+import type { Review, GeneratedSiteData } from '../types';
+import { getWaLink, resolveFaqs } from '../lib/archetypeUtils';
+import { buildHtml, brutalistThemeAdapter } from '../lib/htmlBuilder';
 
 export function BrutalistSite({ data, onBack, currentOverride, onSwitch }: { data: GeneratedSiteData, onBack: () => void, currentOverride: string, onSwitch: (v: string) => void }) {
   const heroPhoto = data.photos[0] || '';
@@ -130,14 +14,8 @@ export function BrutalistSite({ data, onBack, currentOverride, onSwitch }: { dat
   const ctaLink = getWaLink(data.phone, `Hi ${data.name}, I found you on Google.`);
 
   const handleExport = () => {
-    const html = generateBrutalistHtml(data);
-    const blob = new Blob([html], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${data.name.toLowerCase().replace(/\s+/g, '-')}-brutalist.html`;
-    a.click();
-    URL.revokeObjectURL(url);
+    const html = buildHtml(data, brutalistThemeAdapter);
+    downloadHtml(html, `${slugifyFilename(data.name)}-brutalist.html`);
   };
   
   return (

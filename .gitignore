@@ -6,3 +6,6 @@ coverage/
 *.log
 .env*
 !.env.example
+errors.txt
+test_apis.ts
+
